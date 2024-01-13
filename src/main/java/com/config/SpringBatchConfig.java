@@ -52,14 +52,14 @@ public class SpringBatchConfig {
     }
 
 
-    @Bean
+    /*@Bean
     public ItemWriter<CustomerDetail> customerItemWriter(){
         return items -> {
             for(CustomerDetail c : items) {
                 System.out.println(c.toString());
             }
         };
-    }
+    }*/
 
     @Bean
     public JdbcPagingItemReader<CustomerDetail> pagingItemReader(){
