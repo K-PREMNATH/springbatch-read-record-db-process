@@ -1,6 +1,7 @@
 package com.config;
 
 import com.dto.CustomerDetail;
+import com.dto.CustomerFileDTO;
 import com.mapper.CustomerRowMapper;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,20 +35,22 @@ public class SpringBatchConfig {
     private DataSource dataSource;
 
     @Bean
-    public Job job() {
+    public Job job(@Qualifier("step1") Step step1) {
         return jobBuilderFactory.get("job")
-                .start(step1())
+                .start(step1)
                 .build();
     }
 
-    @Bean
-    public Step step1() {
+    @Bean("step1")
+    public Step step1(@Autowired FixedLengthProcessor fixedLengthProcessor,@Autowired FixedLengthFileWriter fixedLengthFileWriter) {
         return stepBuilderFactory.get("step1")
-                .<CustomerDetail, CustomerDetail>chunk(5)
+                .<CustomerDetail, CustomerFileDTO>chunk(5)
                 .reader(pagingItemReader())
-                .writer(customerItemWriter())
+                .processor(fixedLengthProcessor)
+                .writer(fixedLengthFileWriter)
                 .build();
     }
+
 
     @Bean
     public ItemWriter<CustomerDetail> customerItemWriter(){
